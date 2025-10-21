@@ -1,0 +1,21 @@
+volumes:
+  postgres_data:
+
+services:
+  db:
+    image: postgres:alpine
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - "postgres_data:/var/lib/postgresql"
+    restart: unless-stopped
+
+  api:
+    image: ghcr.io/linuxfight/hsekey:main
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:3000:3000"
+    restart: unless-stopped

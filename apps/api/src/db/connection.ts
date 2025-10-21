@@ -7,5 +7,7 @@ const client = new SQL(process.env.DATABASE_URL!);
 
 export const db = drizzle({ client });
 
-await migrate(db, { migrationsFolder: './drizzle' });
+(async () => {
+    await migrate(db, { migrationsFolder: './drizzle' });
+})();
 
