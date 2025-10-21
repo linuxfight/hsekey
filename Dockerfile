@@ -20,7 +20,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 WORKDIR /app
 COPY --from=builder /app/apps/api/drizzle /app/drizzle
 COPY --from=builder /app/dist/server /app/server
-COPY --from=builder /app/apps/api/node_modules/trpc-ui/lib/react-app/* /$bunfs/root/react-app/
 
 # Create non-root user
 RUN useradd -m appuser && chown -R appuser /app && chmod +x /app/server

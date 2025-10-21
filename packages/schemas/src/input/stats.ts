@@ -5,5 +5,3 @@ export const StatsInputSchema = z.object({
     activity: z.string().min(0).max(1000),
     token: z.string().min(60).max(120)
 });
-
-export type StatsInput = z.infer<typeof StatsInputSchema>;

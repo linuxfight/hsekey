@@ -17,7 +17,7 @@ export const stats = pgTable('stats', {
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 });
 
-export const products = pgTable('goods', {
+export const products = pgTable('products', {
     id: serial('id').primaryKey(),
     name: varchar('name', { length: 255 }).notNull(),
     price: integer('price').notNull(),

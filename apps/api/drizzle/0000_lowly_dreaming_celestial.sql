@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS "goods" (
+CREATE TABLE IF NOT EXISTS "products" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"price" integer NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 --> statement-breakpoint
 ALTER TABLE "stats" ADD CONSTRAINT "stats_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "transactions" ADD CONSTRAINT "transactions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "transactions" ADD CONSTRAINT "transactions_product_id_goods_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."goods"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;
 
 -- Function to calculate points
 CREATE OR REPLACE FUNCTION calculate_user_points(user_id_param integer)
