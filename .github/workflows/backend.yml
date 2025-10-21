@@ -5,10 +5,14 @@ on:
     paths-ignore:
       - .gitignore
       - README.md
+      - compose.yml
+      - .npmrc
   pull_request:
     paths-ignore:
       - .gitignore
       - README.md
+      - compose.yml
+      - .npmrc
 
 permissions:
   contents: write

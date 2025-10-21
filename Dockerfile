@@ -16,8 +16,9 @@ FROM debian:stable-slim AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
-# Copy compiled binary
+# Copy compiled binary and migrations
 WORKDIR /app
+COPY --from=builder /app/apps/api/drizzle /app/drizzle
 COPY --from=builder /app/dist/server /app/server
 
 # Create non-root user

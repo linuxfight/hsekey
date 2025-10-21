@@ -1,15 +1,10 @@
-import { AuthInputSchema } from "@repo/schemas";
+import { AuthInputSchema, AuthTokenData } from "@repo/schemas";
 import { db } from "../db/connection";
 import { users } from "../db/schema";
 import { eq } from "drizzle-orm/sql/expressions/conditions";
 import { t } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import * as jose from 'jose';
-import * as process from "node:process";
-
-const secret = new TextEncoder().encode(
-    process.env.JWT_SECRET!
-);
+import * as jwt from '../utils/jwt';
 
 export const authRouter = t.router({
   login: t.procedure
@@ -17,14 +12,14 @@ export const authRouter = t.router({
     .mutation(async ({ input }) => {
       const { email, password } = input;
 
-      const existingUsers = await db
+      const usersList = await db
           .select().from(users).limit(1)
           .where(eq(users.email, email));
 
-      if (existingUsers.length == 1) {
-          const existingUser = existingUsers[0];
+      if (usersList.length == 1) {
+          const user = usersList[0];
 
-          const isValid = await Bun.password.verify(password, existingUser.passwordHash);
+          const isValid = await Bun.password.verify(password, user.passwordHash);
 
           if (!isValid) {
               throw new TRPCError({
@@ -33,15 +28,13 @@ export const authRouter = t.router({
               });
           }
 
-          const token = await new jose.SignJWT({
-              id: existingUser.id,
-          }).setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setExpirationTime('24h').sign(secret);
+          const token = await jwt.create(user.id);
 
-          return { token: token };
+          return new AuthTokenData(token);
       } else {
           const passwordHash = await Bun.password.hash(password);
 
-          const newUser = await db
+          const newUsersList = await db
               .insert(users)
               .values({
                   email,
@@ -49,11 +42,9 @@ export const authRouter = t.router({
               })
               .returning({ id: users.id, email: users.email });
 
-          const token = await new jose.SignJWT({
-              id: newUser[0].id,
-          }).setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setExpirationTime('24h').sign(secret);
+          const token = await jwt.create(newUsersList[0].id);
 
-          return { token: token };
+          return new AuthTokenData(token);
       }
     }),
 });
