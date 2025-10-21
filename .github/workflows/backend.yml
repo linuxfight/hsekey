@@ -1,0 +1,70 @@
+name: Build backend
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - .gitignore
+      - README.md
+  pull_request:
+    paths-ignore:
+      - .gitignore
+      - README.md
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  # test: TODO
+
+  build:
+    name: Build docker image (push, only if branch is main, just check if image builds)
+    runs-on: ubuntu-latest
+
+    concurrency:
+      group: build-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Copy repository
+        uses: actions/checkout@v5
+
+      - name: Convert repository to lowercase
+        id: lowercase
+        run: |
+          lowercase_repo=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "repository=$lowercase_repo" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.repository }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.ref == 'refs/heads/main' }}
+          platforms: linux/amd64
+          # linux/arm64 removed, not running backend locally with docker because:
+          # - need to often change things in C# code
+          # - there's no point in running locally on arm when there's no internet, cause frontend doesn't work without tg
+          # - there's already a test backend
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
