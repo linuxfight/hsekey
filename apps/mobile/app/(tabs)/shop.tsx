@@ -72,8 +72,6 @@ const getStyles = (colorScheme) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors[colorScheme].border,
   },
   balanceContainer: {
     backgroundColor: '#FFC107',
@@ -116,7 +114,7 @@ const getStyles = (colorScheme) => StyleSheet.create({
     color: '#fff',
   },
   buyButton: {
-    backgroundColor: 'rgba(255, 193, 7, 0.7)',
+    backgroundColor: 'rgba(255, 193, 7)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
