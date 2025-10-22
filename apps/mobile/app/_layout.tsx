@@ -31,13 +31,11 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <SafeAreaView>
-        <AuthProvider>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <RootLayoutNav />
-                <StatusBar style="auto" />
-            </ThemeProvider>
-        </AuthProvider>
-    </SafeAreaView>
+      <AuthProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+              <RootLayoutNav />
+              <StatusBar style="auto" />
+          </ThemeProvider>
+      </AuthProvider>
   );
 }

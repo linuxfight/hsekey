@@ -6,7 +6,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingVi
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { ThemedView } from "@/components/themed-view";
+import { ThemedView } from '@/components/themed-view';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -25,54 +25,55 @@ const LoginScreen = () => {
   };
 
   return (
-    <ThemedView>
-        <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.container}
-        >
-            <View style={styles.inner}>
-                <Text style={styles.title}>КЧ Ключ</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Email"
-                    placeholderTextColor="#999"
-                    onChangeText={setEmail}
-                    value={email}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Password"
-                    placeholderTextColor="#999"
-                    onChangeText={setPassword}
-                    value={password}
-                    secureTextEntry
-                />
-                <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                    <Text style={styles.buttonText}>Login</Text>
-                </TouchableOpacity>
-            </View>
-        </KeyboardAvoidingView>
-    </ThemedView>
+      <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.container}
+      >
+          <View style={styles.inner}>
+              <Text style={styles.title}>КЧ Ключ</Text>
+              <TextInput
+                  style={styles.input}
+                  placeholder="Email"
+                  placeholderTextColor="#999"
+                  onChangeText={setEmail}
+                  value={email}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+              />
+              <TextInput
+                  style={styles.input}
+                  placeholder="Password"
+                  placeholderTextColor="#999"
+                  onChangeText={setPassword}
+                  value={password}
+                  secureTextEntry
+              />
+              <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                  <Text style={styles.buttonText}>Login</Text>
+              </TouchableOpacity>
+          </View>
+      </KeyboardAvoidingView>
   );
 };
 
-const getStyles = (colorScheme) => StyleSheet.create({
+const getStyles = (colorScheme: string) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+      backgroundColor: Colors[colorScheme].background,
   },
   inner: {
     width: '80%',
     justifyContent: 'center',
     alignItems: 'center',
+      backgroundColor: Colors[colorScheme].background,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: Colors[colorScheme].text,
   },
   input: {
     width: '100%',
@@ -82,6 +83,8 @@ const getStyles = (colorScheme) => StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 15,
     fontSize: 16,
+    borderColor: Colors[colorScheme].border,
+    color: Colors[colorScheme].text,
   },
   button: {
     backgroundColor: '#FFC107', // Light Orange

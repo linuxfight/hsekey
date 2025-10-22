@@ -1,48 +1,65 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ImageBackground, TouchableOpacity, Alert } from 'react-native';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { ThemedView } from "@/components/themed-view";
+import { Colors } from '@/constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ThemedView } from '@/components/themed-view';
 
 const mockItems = [
-  { id: '1', name: 'Item 1', price: '100', image: 'https://cataas.com/cat' },
-  { id: '2', name: 'Item 2', price: '200', image: 'https://cataas.com/cat' },
-  { id: '3', name: 'Item 3', price: '300', image: 'https://cataas.com/cat' },
-  { id: '4', name: 'Item 4', price: '400', image: 'https://cataas.com/cat' },
-  { id: '5', name: 'Item 5', price: '500', image: 'https://cataas.com/cat' },
-  { id: '6', name: 'Item 6', price: '600', image: 'https://cataas.com/cat' },
+  { id: '1', name: 'Item 1', price: 100, image: 'https://cataas.com/cat' },
+  { id: '2', name: 'Item 2', price: 200, image: 'https://cataas.com/cat' },
+  { id: '3', name: 'Item 3', price: 300, image: 'https://cataas.com/cat' },
+  { id: '4', name: 'Item 4', price: 400, image: 'https://cataas.com/cat' },
+  { id: '5', name: 'Item 5', price: 500, image: 'https://cataas.com/cat' },
+  { id: '6', name: 'Item 6', price: 600, image: 'https://cataas.com/cat' },
 ];
 
-const ShopScreen = () => {
+export const ShopScreen = () => {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
+  const [balance, setBalance] = React.useState(1000);
+
+  const handleBuy = (item) => {
+    if (balance >= item.price) {
+      setBalance(balance - item.price);
+      Alert.alert('Success', `You have purchased ${item.name}`);
+    } else {
+      Alert.alert('Error', 'You do not have enough funds to purchase this item');
+    }
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <Image source={{ uri: item.image }} style={styles.itemImage} />
-      <Text style={styles.itemName}>{item.name}</Text>
-      <TouchableOpacity style={styles.buyButton}>
-        <Ionicons name="cart" size={20} color="#fff" />
-        <Text style={styles.buyButtonText}>{item.price}</Text>
-      </TouchableOpacity>
+      <ImageBackground source={{ uri: item.image }} style={styles.imageBackground} imageStyle={styles.imageStyle}>
+        <View style={styles.overlayView}>
+          <Text style={styles.itemName}>{item.name}</Text>
+          <TouchableOpacity style={styles.buyButton} onPress={() => handleBuy(item)}>
+            <Ionicons name="cart" size={20} color="#fff" />
+            <Text style={styles.buyButtonText}>{item.price}</Text>
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
     </View>
   );
 
   return (
     <ThemedView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.balanceContainer}>
-          <Text style={styles.balanceText}>Balance: 1000</Text>
+      <SafeAreaView>
+        <View style={styles.header}>
+            <View style={styles.balanceContainer}>
+                <Text style={styles.balanceText}>Balance: {balance}</Text>
+            </View>
         </View>
-      </View>
-      <FlatList
-        data={mockItems}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        contentContainerStyle={styles.listContainer}
-      />
+        <FlatList
+            data={mockItems}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            contentContainerStyle={styles.listContainer}
+        />
+      </SafeAreaView>
     </ThemedView>
   );
 };
@@ -56,6 +73,7 @@ const getStyles = (colorScheme) => StyleSheet.create({
     justifyContent: 'flex-end',
     padding: 10,
     borderBottomWidth: 1,
+    borderBottomColor: Colors[colorScheme].border,
   },
   balanceContainer: {
     backgroundColor: '#FFC107',
@@ -75,23 +93,30 @@ const getStyles = (colorScheme) => StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     margin: 5,
-    padding: 10,
     borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
+    overflow: 'hidden',
+    height: 200,
   },
-  itemImage: {
-    width: 100,
-    height: 100,
-    marginBottom: 10,
+  imageBackground: {
+    flex: 1,
+    justifyContent: 'flex-end',
   },
+  imageStyle: {
+    resizeMode: 'cover',
+  },
+    overlayView: {
+        padding: 10,
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)', // Semi-transparent dark background
+    },
   itemName: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: '#fff',
   },
   buyButton: {
-    backgroundColor: '#FFC107',
+    backgroundColor: 'rgba(255, 193, 7, 0.7)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
