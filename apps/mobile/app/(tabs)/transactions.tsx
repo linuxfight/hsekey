@@ -3,33 +3,25 @@ import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedView } from '@/components/themed-view';
 
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { ThemedText } from "@/components/themed-text";
+
 const mockTransactions = [
-  {
-    id: '1',
-    price: 100,
-    amount: 1,
-    itemTitle: 'Item 1',
-    imageUrl: 'https://cataas.com/cat',
-    isPromocode: false,
-    promocode: 'PROMO123',
-    cancelled: false,
-  },
+    {
+        id: '1',
+        price: 100,
+        amount: 1,
+        itemTitle: 'Батончик',
+        imageUrl: 'https://sportivnoepitanie.ru/img/item/500/bombbar-protein-bar-60g.jpg',
+        promocode: 'PROMO123',
+        cancelled: false,
+    },
   {
     id: '2',
-    price: 200,
-    amount: 1,
-    itemTitle: 'Item 2',
-    imageUrl: 'https://cataas.com/cat',
-    isPromocode: true,
-    promocode: 'PROMO456',
-    cancelled: false,
-  },
-  {
-    id: '3',
     price: 300,
     amount: 2,
-    itemTitle: 'Item 3',
-    imageUrl: 'https://cataas.com/cat',
+    itemTitle: 'Протеин 100%',
+    imageUrl: 'https://sportivnoepitanie.ru/img/item/500/optimum-nutrition-100-whey-gold-standard-2270g-1.jpg',
     isPromocode: false,
     promocode: 'PROMO789',
     cancelled: true,
@@ -37,19 +29,19 @@ const mockTransactions = [
 ];
 
 export const TransactionsScreen = () => {
-  const renderItem = ({ item }) => (
+    const colorScheme = useColorScheme();
+    const styles = getStyles(colorScheme);
+
+    const renderItem = ({ item }) => (
     <ThemedView style={styles.itemContainer}>
       <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
       <View style={styles.itemDetails}>
-        <Text style={[styles.itemTitle, item.cancelled && styles.cancelledText]}>{item.itemTitle}</Text>
-        <Text style={item.cancelled && styles.cancelledText}>Price: {item.price}</Text>
-        <Text style={item.cancelled && styles.cancelledText}>Amount: {item.amount}</Text>
+        <ThemedText style={[styles.itemTitle, item.cancelled && styles.cancelledText]}>{item.itemTitle}</ThemedText>
+        <ThemedText style={item.cancelled && styles.cancelledText}>Цена: {item.price * item.amount}</ThemedText>
       </View>
-      {item.isPromocode && (
         <View style={styles.promocodeContainer}>
-          <Text style={[styles.promocodeText, item.cancelled && styles.cancelledText]}>{item.promocode}</Text>
+            <Text style={[styles.promocodeText, item.cancelled && styles.cancelledText]}>{item.promocode}</Text>
         </View>
-      )}
     </ThemedView>
   );
 
@@ -64,27 +56,28 @@ export const TransactionsScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colorScheme) => StyleSheet.create({
   container: {
     flex: 1,
   },
   itemContainer: {
     flexDirection: 'row',
     padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+      margin: 10,
+      borderRadius: 25,
     alignItems: 'center',
   },
   itemImage: {
     width: 50,
     height: 50,
     marginRight: 10,
+      borderRadius: 25,
   },
   itemDetails: {
     flex: 1,
   },
   itemTitle: {
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   promocodeContainer: {
     marginLeft: 'auto',
@@ -93,6 +86,9 @@ const styles = StyleSheet.create({
     color: 'green',
     fontWeight: 'bold',
   },
+    text: {
+      color: 'white',
+    },
   cancelledText: {
     textDecorationLine: 'line-through',
     color: 'gray',

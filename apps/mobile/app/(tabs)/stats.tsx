@@ -4,14 +4,16 @@ import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-nati
 import { LineChart } from 'react-native-chart-kit';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import moment from 'moment';
+import { ThemedText } from "@/components/themed-text";
 
 const screenWidth = Dimensions.get('window').width;
 
 const chartConfig = {
   backgroundGradientFrom: '#fff',
   backgroundGradientTo: '#fff',
-  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
   strokeWidth: 2, // optional, default 3
+
+    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
   barPercentage: 0.5,
   useShadowColorFromDataset: false, // optional
 };
@@ -48,15 +50,14 @@ export const StatsScreen = () => {
     <ThemedView style={styles.container}>
       <SafeAreaView>
         <View style={styles.header}>
-          <Text style={styles.title}>Statistics</Text>
-          <Text style={styles.date}>{week.format('MMMM YYYY')}</Text>
+          <ThemedText style={styles.date}>{week.format('MMMM YYYY')}</ThemedText>
           <View style={styles.weekNavigation}>
             <TouchableOpacity onPress={handlePrevWeek}>
-              <Text style={styles.navButton}>&lt; Prev</Text>
+              <ThemedText style={styles.navButton}>&lt; Пред.</ThemedText>
             </TouchableOpacity>
-            <Text>{week.startOf('week').format('MMM D')} - {week.endOf('week').format('MMM D')}</Text>
+            <ThemedText>{week.startOf('week').format('MMM D')} - {week.endOf('week').format('MMM D')}</ThemedText>
             <TouchableOpacity onPress={handleNextWeek}>
-              <Text style={styles.navButton}>Next &gt;</Text>
+              <ThemedText style={styles.navButton}>След. &gt;</ThemedText>
             </TouchableOpacity>
           </View>
         </View>

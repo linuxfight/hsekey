@@ -2,11 +2,10 @@
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
-import { ThemedView } from '@/components/themed-view';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -30,10 +29,10 @@ const LoginScreen = () => {
           style={styles.container}
       >
           <View style={styles.inner}>
-              <Text style={styles.title}>КЧ Ключ</Text>
+              <Image source={ require('../../assets/images/fitboost.png') } style={styles.logo} />
               <TextInput
                   style={styles.input}
-                  placeholder="Email"
+                  placeholder="Почта"
                   placeholderTextColor="#999"
                   onChangeText={setEmail}
                   value={email}
@@ -42,14 +41,14 @@ const LoginScreen = () => {
               />
               <TextInput
                   style={styles.input}
-                  placeholder="Password"
+                  placeholder="Пароль"
                   placeholderTextColor="#999"
                   onChangeText={setPassword}
                   value={password}
                   secureTextEntry
               />
               <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                  <Text style={styles.buttonText}>Login</Text>
+                  <Text style={styles.buttonText}>Войти</Text>
               </TouchableOpacity>
           </View>
       </KeyboardAvoidingView>
@@ -57,7 +56,13 @@ const LoginScreen = () => {
 };
 
 const getStyles = (colorScheme: string) => StyleSheet.create({
-  container: {
+    logo: {
+      width: '200',
+      height: '200',
+        margin: 50,
+        borderRadius: 25,
+    },
+    container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',

@@ -1,31 +1,44 @@
-import { BottomNavigation } from "react-native-paper";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ShopScreen from '@/app/(tabs)/shop';
-import StatsScreen from '@/app/(tabs)/stats';
-import TransactionsScreen from '@/app/(tabs)/transactions';
+// components/custom-tab-bar.tsx
+import { BottomNavigation } from 'react-native-paper';
+import { CommonActions } from '@react-navigation/native';
 
-const sceneMap = BottomNavigation.SceneMap({
-    shop: ShopScreen,
-    stats: StatsScreen,
-    transactions: TransactionsScreen,
-});
-
-export function CustomTabBar({ navigation, state, descriptors }) {
-    const insets = useSafeAreaInsets();
+export function CustomTabBar({ navigation, state, descriptors, insets }) {
     return (
-        <BottomNavigation
+        <BottomNavigation.Bar
             navigationState={state}
-            onIndexChange={(index) => {
-                navigation.navigate(state.routes[index].name);
+            safeAreaInsets={insets}
+            onTabPress={({ route, preventDefault }) => {
+                const event = navigation.emit({
+                    type: 'tabPress',
+                    target: route.key,
+                    canPreventDefault: true,
+                });
+
+                if (event.defaultPrevented) {
+                    preventDefault();
+                } else {
+                    navigation.dispatch({
+                        ...CommonActions.navigate(route.name, route.params),
+                        target: state.key,
+                    });
+                }
             }}
-            renderScene={sceneMap}
+            renderIcon={({ route, focused, color }) => {
+                const { options } = descriptors[route.key];
+                return options.tabBarIcon?.({ focused, color, size: 24 }) || null;
+            }}
+            getLabelText={({ route }) => {
+                const { options } = descriptors[route.key];
+                const label =
+                    typeof options.tabBarLabel === 'string'
+                        ? options.tabBarLabel
+                        : typeof options.title === 'string'
+                            ? options.title
+                            : route.name;
+                return label;
+            }}
             shifting={true}
-            activeColor="#fff"
             inactiveColor="#ddd"
-            barStyle={{ backgroundColor: '#FFC107' }}
-            safeAreaInsets={{
-                bottom: insets.bottom,
-            }}
         />
     );
 }

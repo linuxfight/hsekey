@@ -3,17 +3,13 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, ImageBackground, TouchableOpacity, Alert } from 'react-native';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Colors } from '@/constants/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedView } from '@/components/themed-view';
 
 const mockItems = [
-  { id: '1', name: 'Item 1', price: 100, image: 'https://cataas.com/cat' },
-  { id: '2', name: 'Item 2', price: 200, image: 'https://cataas.com/cat' },
-  { id: '3', name: 'Item 3', price: 300, image: 'https://cataas.com/cat' },
-  { id: '4', name: 'Item 4', price: 400, image: 'https://cataas.com/cat' },
-  { id: '5', name: 'Item 5', price: 500, image: 'https://cataas.com/cat' },
-  { id: '6', name: 'Item 6', price: 600, image: 'https://cataas.com/cat' },
+  { id: '1', name: 'Батончик', price: 50, image: 'https://vitaminof.ru/upload/iblock/bb5/111.jpg' },
+  { id: '2', name: 'Бутылка для воды', price: 250, image: 'https://leonardo.osnova.io/d92d1228-0f53-5d0e-ae87-f24556cee743/-/scale_crop/592x/-/format/webp/' },
+  { id: '3', name: 'Умные часы', price: 150000, image: 'https://ir.ozone.ru/s3/multimedia-1-4/wc1000/7402036684.jpg' },
 ];
 
 export const ShopScreen = () => {
@@ -49,7 +45,7 @@ export const ShopScreen = () => {
       <SafeAreaView>
         <View style={styles.header}>
             <View style={styles.balanceContainer}>
-                <Text style={styles.balanceText}>Balance: {balance}</Text>
+                <Text style={styles.balanceText}>Баланс: {balance}</Text>
             </View>
         </View>
         <FlatList
