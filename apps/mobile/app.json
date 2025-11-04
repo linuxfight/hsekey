@@ -13,6 +13,7 @@
       "bundleIdentifier": "com.anonymous.mobile"
     },
     "android": {
+      "permissions": ["android.permission.health.READ_STEPS"],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -29,6 +30,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-health-connect",
       [
         "expo-splash-screen",
         {
@@ -38,6 +40,16 @@
           "backgroundColor": "#ffffff",
           "dark": {
             "backgroundColor": "#000000"
+          }
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36,
+            "minSdkVersion": 26
           }
         }
       ]

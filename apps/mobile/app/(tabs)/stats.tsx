@@ -1,72 +1,172 @@
-import { ThemedView } from '@/components/themed-view';
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import moment from 'moment';
+import { ThemedView } from "@/components/themed-view";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
+import { LineChart } from "react-native-chart-kit";
+import { SafeAreaView } from "react-native-safe-area-context";
+import moment from "moment";
 import { ThemedText } from "@/components/themed-text";
+import {
+  initialize,
+  requestPermission,
+  readRecords,
+  RecordResult,
+} from "react-native-health-connect";
 
-const screenWidth = Dimensions.get('window').width;
+const screenWidth = Dimensions.get("window").width;
 
 const chartConfig = {
-  backgroundGradientFrom: '#fff',
-  backgroundGradientTo: '#fff',
+  backgroundGradientFrom: "#fff",
+  backgroundGradientTo: "#fff",
   strokeWidth: 2, // optional, default 3
 
-    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
   barPercentage: 0.5,
   useShadowColorFromDataset: false, // optional
 };
 
+const readSampleData = async (date: moment.Moment) => {
+  const isInitialized = await initialize();
+
+  const grantedPermissions = await requestPermission([
+    { accessType: "read", recordType: "Steps" },
+  ]);
+
+  moment.updateLocale("en", {
+    week: {
+      dow: 1,
+    },
+  });
+
+  const start = date.clone().startOf("isoWeek").toISOString(true);
+  const end = date.clone().endOf("isoWeek").toISOString(true);
+
+  console.log("=== Fetching week ===");
+  console.log("Start:", start, "->", moment(start).format("MMM D, YYYY"));
+  console.log("End:", end, "->", moment(end).format("MMM D, YYYY"));
+
+  const { records } = await readRecords("Steps", {
+    timeRangeFilter: {
+      operator: "between",
+      startTime: start,
+      endTime: end,
+    },
+  });
+
+  console.log(`Found ${records.length} records`);
+
+  if (records.length > 0) {
+    // Show daily breakdown
+    const dailySteps: { [key: string]: number } = {};
+    records.forEach((record) => {
+      const dateKey = moment(record.startTime).format("MMM D (ddd)");
+      dailySteps[dateKey] = (dailySteps[dateKey] || 0) + record.count;
+    });
+    console.log("Daily breakdown:", dailySteps);
+  }
+
+  return records;
+};
+
+const processRecords = (records: RecordResult<"Steps">[]) => {
+  const weekData = Array(7).fill(0);
+
+  if (!records || records.length === 0) {
+    return weekData;
+  }
+
+  records.forEach((record) => {
+    if (record) {
+      const day = moment(record.startTime).isoWeekday(); // 1=Monday, 7=Sunday
+      if (day >= 1 && day <= 7) {
+        weekData[day - 1] += record.count; // Convert to 0-indexed (Monday=0)
+      }
+    }
+  });
+
+  return weekData.map((val) => (isFinite(val) ? val : 0));
+};
+
 export const StatsScreen = () => {
+  const [records, setRecords] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]); // Initialize with zeros
   const [week, setWeek] = useState(moment());
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    readSampleData(week)
+      .then((fetchedRecords) => {
+        const processed = processRecords(fetchedRecords);
+        console.log("Processed records:", processed); // Debug log
+        setRecords(processed);
+      })
+      .catch((error) => {
+        console.error(error);
+        setRecords([0, 0, 0, 0, 0, 0, 0]); // Set zeros on error
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [week]);
 
   const handlePrevWeek = () => {
-    setWeek(week.clone().subtract(1, 'week'));
+    setWeek(week.clone().subtract(1, "week"));
   };
 
   const handleNextWeek = () => {
-    setWeek(week.clone().add(1, 'week'));
+    setWeek(week.clone().add(1, "week"));
   };
 
+  // Ensure data is always valid
+  const safeRecords = records.map((val) =>
+    typeof val === "number" && isFinite(val) ? val : 0,
+  );
+
   const data = {
-    labels: Array(7).fill(0).map((_, i) => week.clone().startOf('week').add(i, 'day').format('ddd')),
+    labels: Array(7)
+      .fill(0)
+      .map((_, i) =>
+        week.clone().startOf("isoWeek").add(i, "day").format("ddd"),
+      ),
     datasets: [
       {
-        data: Array(7).fill(0).map(() => Math.random() * 100),
-        color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
-        strokeWidth: 2, // optional
-      },
-      {
-        data: Array(7).fill(0).map(() => Math.random() * 100),
-        color: (opacity = 1) => `rgba(244, 65, 65, ${opacity})`, // optional
-        strokeWidth: 2, // optional
+        data: safeRecords.length > 0 ? safeRecords : [0, 0, 0, 0, 0, 0, 0],
+        color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
+        strokeWidth: 2,
       },
     ],
-    legend: ['Activity 1', 'Activity 2'], // optional
+    legend: ["Steps"],
   };
 
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView>
         <View style={styles.header}>
-          <ThemedText style={styles.date}>{week.format('MMMM YYYY')}</ThemedText>
+          <ThemedText style={styles.date}>
+            {week.format("MMMM YYYY")}
+          </ThemedText>
           <View style={styles.weekNavigation}>
             <TouchableOpacity onPress={handlePrevWeek}>
               <ThemedText style={styles.navButton}>&lt; Пред.</ThemedText>
             </TouchableOpacity>
-            <ThemedText>{week.startOf('week').format('MMM D')} - {week.endOf('week').format('MMM D')}</ThemedText>
+            <ThemedText>
+              {week.clone().startOf("week").format("MMM D")} -{" "}
+              {week.clone().endOf("week").format("MMM D")}
+            </ThemedText>
             <TouchableOpacity onPress={handleNextWeek}>
               <ThemedText style={styles.navButton}>След. &gt;</ThemedText>
             </TouchableOpacity>
           </View>
         </View>
-        <LineChart
-          data={data}
-          width={screenWidth}
-          height={220}
-          chartConfig={chartConfig}
-        />
+        {loading ? (
+          <ThemedText>Loading...</ThemedText>
+        ) : (
+          <LineChart
+            data={data}
+            width={screenWidth}
+            height={220}
+            chartConfig={chartConfig}
+          />
+        )}
       </SafeAreaView>
     </ThemedView>
   );
@@ -75,27 +175,27 @@ export const StatsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 20,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   date: {
     fontSize: 18,
   },
   weekNavigation: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '80%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "80%",
     marginTop: 10,
   },
   navButton: {
-    color: '#0a7ea4',
+    color: "#0a7ea4",
   },
 });
 
