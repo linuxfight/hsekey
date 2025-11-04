@@ -1,4 +1,4 @@
-name: Build backend
+name: Build
 on:
   workflow_dispatch:
   push:
@@ -64,10 +64,6 @@ jobs:
           context: .
           push: ${{ github.ref == 'refs/heads/main' }}
           platforms: linux/amd64
-          # linux/arm64 removed, not running backend locally with docker because:
-          # - need to often change things in C# code
-          # - there's no point in running locally on arm when there's no internet, cause frontend doesn't work without tg
-          # - there's already a test backend
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
