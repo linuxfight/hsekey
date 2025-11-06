@@ -61,7 +61,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: api/
           push: ${{ github.ref == 'refs/heads/main' }}
           platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
