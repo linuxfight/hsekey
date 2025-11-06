@@ -4,8 +4,14 @@ import { db } from "../db/connection";
 import { products, transactions } from "../db/schema";
 import { getUser } from "../utils/user";
 import { generatePromoCode } from "../utils/promocode";
+import {jwt} from "@elysiajs/jwt";
+import "dotenv";
 
 export const productsRouter = new Elysia()
+  .use(jwt({
+    name: 'jwt',
+    secret: Bun.env.JWT_SECRET!,
+  }))
     .error({
         "NOT_FOUND": Error,
         "FORBIDDEN": Error
@@ -18,37 +24,18 @@ export const productsRouter = new Elysia()
             code: t.String()
         })
     })
-    .post("/api/products/create", async ({ body, jwt }) => {
-        const { name, price, amount, imageUrl } = body;
+    .get("/api/products/balance", async ({ jwt, headers, status }) => {
+      const token = headers['authorization'];
 
-        await getUser(jwt);
+        const verified = await jwt.verify(token);
 
-        await db
-            .insert(products)
-            .values({ name, price, amount, imageUrl });
-
-        return { ok: true };
-    }, {
-        body: t.Object({
-            name: t.String(),
-            price: t.Number(),
-            amount: t.Number(),
-            imageUrl: t.String(),
-        }),
-        response: {
-            200: t.Object({
-                ok: t.Boolean()
-            }),
-            401: "error",
-            500: "error"
-        },
-        detail: {
-            description: "Create a new product. Requires a valid auth token.",
-            tags: ["products"]
+        if (!verified) {
+          return status(401, {
+            message: "UNAUTHORIZED"
+          });
         }
-    })
-    .get("/api/products/balance", async ({ jwt }) => {
-        const user = await getUser(jwt);
+
+        const user = await getUser(verified);
 
         return { balance: user.points };
     }, {
@@ -64,10 +51,20 @@ export const productsRouter = new Elysia()
             tags: ["products"]
         }
     })
-    .post("/api/products/buy", async ({ body, jwt, status }) => {
+    .post("/api/products/buy", async ({ body, jwt, headers, status }) => {
         const { productId } = body;
 
-        const user = await getUser(jwt);
+        const token = headers['authorization'];
+
+          const verified = await jwt.verify(token);
+
+          if (!verified) {
+            return status(401, {
+              message: "UNAUTHORIZED"
+            });
+          }
+
+          const user = await getUser(verified);
 
         const productList = await db
             .select()
@@ -117,10 +114,19 @@ export const productsRouter = new Elysia()
             tags: ["products"]
         }
     })
-    .get("/api/products/search", async ({ query, jwt }) => {
+    .get("/api/products/search", async ({ jwt, headers, status, query }) => {
        const { limit, page, query: searchQuery } = query;
+       const token = headers['authorization'];
 
-        await getUser(jwt);
+         const verified = await jwt.verify(token);
+
+         if (!verified) {
+           return status(401, {
+             message: "UNAUTHORIZED"
+           });
+         }
+
+         const user = await getUser(verified);
 
         return await db
             .select().from(products).limit(limit)
@@ -152,10 +158,19 @@ export const productsRouter = new Elysia()
             tags: ["products"]
         }
     })
-    .get("/api/products/list", async ({ query, jwt }) => {
+    .get("/api/products/list", async ({ query, status, headers, jwt }) => {
         const { page, limit } = query;
+        const token = headers['authorization'];
 
-        await getUser(jwt);
+          const verified = await jwt.verify(token);
+
+          if (!verified) {
+            return status(401, {
+              message: "UNAUTHORIZED"
+            });
+          }
+
+          const user = await getUser(verified);
 
         return await db
             .select().from(products).limit(limit)

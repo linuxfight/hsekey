@@ -9,7 +9,7 @@ export async function getUser(claims: any): Promise<{
     points: number
     createdAt: string
 }> {
-    if (!claims || !claims.id) {
+    if (!claims.id) {
         throw new Error("Invalid credentials");
     }
 

@@ -2,8 +2,14 @@ import {Elysia, t} from "elysia";
 import { db } from "@/db/connection";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm/sql/expressions/conditions";
+import {jwt} from "@elysiajs/jwt";
+import "dotenv";
 
 export const authRouter = new Elysia()
+  .use(jwt({
+      name: 'jwt',
+      secret: Bun.env.JWT_SECRET!,
+    }))
     .error({
         "UNAUTHORIZED": Error
     })

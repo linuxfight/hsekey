@@ -3,8 +3,14 @@ import { db } from "../db/connection";
 import { stats } from "../db/schema";
 import { eq, and, gte, lt } from "drizzle-orm/sql/expressions/conditions";
 import { getUser } from "../utils/user";
+import {jwt} from "@elysiajs/jwt";
+import "dotenv";
 
 export const statsRouter = new Elysia()
+  .use(jwt({
+    name: 'jwt',
+    secret: Bun.env.JWT_SECRET!,
+  }))
     .error({
         "NOT_FOUND": Error
     })
@@ -13,10 +19,19 @@ export const statsRouter = new Elysia()
             message: t.String()
         })
     })
-    .post("/api/stats/report", async ({ body, jwt }) => {
+    .post("/api/stats/report", async ({ body, jwt, headers, status }) => {
         const { count, activity } = body;
+        const token = headers['authorization'];
 
-        const user = await getUser(jwt);
+          const verified = await jwt.verify(token);
+
+          if (!verified) {
+            return status(401, {
+              message: "UNAUTHORIZED"
+            });
+          }
+
+          const user = await getUser(verified);
 
         // Get start of today
         const startOfToday = new Date();
