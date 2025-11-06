@@ -4,6 +4,7 @@ import { View, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { SafeAreaView } from "react-native-safe-area-context";
 import moment from "moment";
+import "moment/locale/ru";
 import { ThemedText } from "@/components/themed-text";
 import {
   initialize,
@@ -12,6 +13,9 @@ import {
   RecordResult,
 } from "react-native-health-connect";
 
+import { useThemeColor } from "@/hooks/use-theme-color";
+
+moment.locale("ru");
 const screenWidth = Dimensions.get("window").width;
 
 const chartConfig = {
@@ -26,23 +30,25 @@ const chartConfig = {
 
 const readSampleData = async (date: moment.Moment) => {
   const isInitialized = await initialize();
+  console.log("Initialized:", isInitialized);
 
+  // Request permission for Steps
   const grantedPermissions = await requestPermission([
     { accessType: "read", recordType: "Steps" },
   ]);
 
-  moment.updateLocale("en", {
-    week: {
-      dow: 1,
-    },
-  });
+  console.log("Granted permissions:", grantedPermissions);
 
-  const start = date.clone().startOf("isoWeek").toISOString(true);
-  const end = date.clone().endOf("isoWeek").toISOString(true);
+  // Get local dates WITHOUT converting to UTC
+  const startMoment = date.clone().startOf("isoWeek");
+  const endMoment = date.clone().endOf("isoWeek");
 
-  console.log("=== Fetching week ===");
-  console.log("Start:", start, "->", moment(start).format("MMM D, YYYY"));
-  console.log("End:", end, "->", moment(end).format("MMM D, YYYY"));
+  // Format as ISO string but keep local timezone
+  const start = startMoment.format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+  const end = endMoment.format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+
+  console.log("Start:", start, "->", startMoment.format("MMM D, YYYY"));
+  console.log("End:", end, "->", endMoment.format("MMM D, YYYY"));
 
   const { records } = await readRecords("Steps", {
     timeRangeFilter: {
@@ -52,17 +58,7 @@ const readSampleData = async (date: moment.Moment) => {
     },
   });
 
-  console.log(`Found ${records.length} records`);
-
-  if (records.length > 0) {
-    // Show daily breakdown
-    const dailySteps: { [key: string]: number } = {};
-    records.forEach((record) => {
-      const dateKey = moment(record.startTime).format("MMM D (ddd)");
-      dailySteps[dateKey] = (dailySteps[dateKey] || 0) + record.count;
-    });
-    console.log("Daily breakdown:", dailySteps);
-  }
+  records.forEach((x) => (x.count /= 1000));
 
   return records;
 };
@@ -90,6 +86,21 @@ export const StatsScreen = () => {
   const [records, setRecords] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]); // Initialize with zeros
   const [week, setWeek] = useState(moment());
   const [loading, setLoading] = useState(true);
+  const themed = {
+    background: useThemeColor({}, "background"),
+    text: useThemeColor({}, "text"),
+    primary: useThemeColor({}, "tint"),
+  };
+
+  const chartConfig = {
+    backgroundGradientFrom: themed.background,
+    backgroundGradientTo: themed.background,
+    strokeWidth: 2, // optional, default 3
+
+    color: (opacity = 1) => themed.text,
+    barPercentage: 0.5,
+    useShadowColorFromDataset: false, // optional
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -130,11 +141,11 @@ export const StatsScreen = () => {
     datasets: [
       {
         data: safeRecords.length > 0 ? safeRecords : [0, 0, 0, 0, 0, 0, 0],
-        color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
+        color: (opacity = 1) => themed.primary,
         strokeWidth: 2,
       },
     ],
-    legend: ["Steps"],
+    legend: ["Баллы за шаги"],
   };
 
   return (
