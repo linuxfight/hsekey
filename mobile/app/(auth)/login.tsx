@@ -2,7 +2,9 @@
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+import { postApiAuthLogin } from '@/api';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
@@ -15,12 +17,24 @@ const LoginScreen = () => {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
 
-  const handleLogin = () => {
-    // Handle login logic here
-    console.log('Email:', email);
-    console.log('Password:', password);
-    login();
-    router.push('/(tabs)/shop');
+  const handleLogin = async () => {
+    try {
+      const response = await postApiAuthLogin({
+        body: {
+          email,
+          password,
+        },
+      });
+      if (response.data?.token) {
+        await SecureStore.setItemAsync('token', response.data.token);
+        login();
+        router.push('/(tabs)/shop');
+      } else {
+        Alert.alert('Login Failed', 'No token received');
+      }
+    } catch (error) {
+      Alert.alert('Login Failed', 'Invalid email or password');
+    }
   };
 
   return (

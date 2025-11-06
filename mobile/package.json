@@ -6,10 +6,12 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "openapi": "openapi-ts -i openapi.json -o api -c @hey-api/client-fetch"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
+    "@hey-api/client-fetch": "^0.13.1",
     "@react-navigation/bottom-tabs": "^7.7.3",
     "@react-navigation/elements": "^2.8.1",
     "@react-navigation/native": "^7.1.19",
@@ -23,6 +25,7 @@
     "expo-image": "~3.0.10",
     "expo-linking": "~8.0.8",
     "expo-router": "^6.0.14",
+    "expo-secure-store": "~15.0.7",
     "expo-splash-screen": "~31.0.10",
     "expo-status-bar": "~3.0.8",
     "expo-symbols": "~1.0.7",
@@ -43,6 +46,7 @@
     "react-native-worklets": "0.5.1"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "0.87.0",
     "@types/react": "~19.1.17",
     "eslint": "^9.39.1",
     "eslint-config-expo": "~10.0.0",

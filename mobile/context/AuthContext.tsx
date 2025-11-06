@@ -5,6 +5,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
+import * as SecureStore from 'expo-secure-store';
 
 type Props = {
   children: ReactNode;
@@ -13,6 +14,7 @@ type Props = {
 const AuthContext = createContext({
   isLoggedIn: false,
   login: () => {},
+  logout: () => {},
   loading: true,
 });
 
@@ -23,19 +25,27 @@ export const AuthProvider = ({ children }: Props) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Here you would typically check for a token in AsyncStorage
-    // For now, we'll just simulate a delay
-    setTimeout(() => {
+    const loadToken = async () => {
+      const token = await SecureStore.getItemAsync('token');
+      if (token) {
+        setIsLoggedIn(true);
+      }
       setLoading(false);
-    }, 1000);
+    };
+    loadToken();
   }, []);
 
   const login = () => {
     setIsLoggedIn(true);
   };
 
+  const logout = () => {
+    SecureStore.deleteItemAsync('token');
+    setIsLoggedIn(false);
+  };
+
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, loading }}>
+    <AuthContext.Provider value={{ isLoggedIn, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

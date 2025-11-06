@@ -1,3 +1,4 @@
+import { getApiProductsBalance, getApiProductsList } from "@/api";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -7,6 +8,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -22,34 +24,41 @@ type Item = {
   image: string;
 };
 
-const mockItems: Item[] = [
-  {
-    id: "1",
-    name: "Батончик",
-    price: 50,
-    image: "https://vitaminof.ru/upload/iblock/bb5/111.jpg",
-  },
-  {
-    id: "2",
-    name: "Бутылка для воды",
-    price: 250,
-    image:
-      "https://leonardo.osnova.io/d92d1228-0f53-5d0e-ae87-f24556cee743/-/scale_crop/592x/-/format/webp/",
-  },
-  {
-    id: "3",
-    name: "Умные часы",
-    price: 150000,
-    image: "https://ir.ozone.ru/s3/multimedia-1-4/wc1000/7402036684.jpg",
-  },
-];
-
 export const ShopScreen = () => {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const [balance, setBalance] = useState(1000);
+  const [balance, setBalance] = useState(0);
+  const [products, setProducts] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [balanceResponse, productsResponse] = await Promise.all([
+          getApiProductsBalance(),
+          getApiProductsList({ query: { page: 0, limit: 10 } }),
+        ]);
+
+        if (balanceResponse.data) {
+          setBalance(balanceResponse.data.balance);
+        }
+
+        if (productsResponse.data) {
+          setProducts(productsResponse.data.map(p => ({...p, image: p.imageUrl})));
+        }
+      } catch (error) {
+        Alert.alert("Error", "Failed to fetch data");
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleBuy = (item: Item) => {
     setSelectedItem(item);
@@ -100,6 +109,14 @@ export const ShopScreen = () => {
     </View>
   );
 
+  if (loading) {
+    return (
+      <ThemedView style={[styles.container, styles.center]}>
+        <ActivityIndicator size="large" />
+      </ThemedView>
+    );
+  }
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView>
@@ -109,7 +126,7 @@ export const ShopScreen = () => {
           </View>
         </View>
         <FlatList
-          data={mockItems}
+          data={products}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
           numColumns={2}
@@ -128,6 +145,10 @@ export const ShopScreen = () => {
 
 const getStyles = (colorScheme) =>
   StyleSheet.create({
+    center: {
+      justifyContent: "center",
+      alignItems: "center",
+    },
     container: {
       flex: 1,
     },
