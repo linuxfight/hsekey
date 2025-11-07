@@ -20,11 +20,6 @@ const PurchaseConfirmationModal = ({ visible, item, onConfirm, onCancel }) => {
           <Image source={{ uri: item.image }} style={styles.itemImage} />
           <ThemedText style={styles.itemName}>{item.name}</ThemedText>
           <ThemedText style={styles.itemPrice}>Цена: {item.price}</ThemedText>
-          import { Button } from "react-native-paper";
-
-// ... (rest of the imports)
-
-// ... (inside the component)
           <View style={styles.buttonContainer}>
             <Button
               mode="contained"

@@ -9,7 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { Button } from "react-native-paper";
+import { Button, Chip } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -121,9 +121,9 @@ export const ShopScreen = () => {
     <ThemedView style={styles.container}>
       <SafeAreaView>
         <View style={styles.header}>
-          <View style={styles.balanceContainer}>
-            <Text style={styles.balanceText}>Баланс: {balance}</Text>
-          </View>
+          <Chip>
+            Баланс: {balance}
+          </Chip>
         </View>
         <FlatList
           data={products}
