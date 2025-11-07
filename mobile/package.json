@@ -7,7 +7,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "lint": "expo lint",
-    "openapi": "openapi-ts -i openapi.json -o api -c @hey-api/client-fetch"
+    "openapi": "openapi-ts -i openapi.json -o api -c @hey-api/client-fetch",
+    "android:release": "eas build -p android --profile production"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -49,6 +50,7 @@
   "devDependencies": {
     "@hey-api/openapi-ts": "0.87.0",
     "@types/react": "~19.1.17",
+    "eas-cli": "^16.26.0",
     "eslint": "^9.39.1",
     "eslint-config-expo": "~10.0.0",
     "expo-build-properties": "^1.0.9",

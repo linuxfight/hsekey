@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "mobile",
+    "name": "FitBoost",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.mobile"
+      "bundleIdentifier": "dev.lxft.fitboost"
     },
     "android": {
       "permissions": [
@@ -57,23 +57,31 @@
         }
       ],
       [
-              "expo-sqlite",
-              {
-                "enableFTS": true,
-                "useSQLCipher": true,
-                "android": {
-                  "enableFTS": false,
-                  "useSQLCipher": false
-                },
-                "ios": {
-                  "customBuildFlags": ["-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1"]
-                }
-              }
+        "expo-sqlite",
+        {
+          "enableFTS": true,
+          "useSQLCipher": true,
+          "android": {
+            "enableFTS": false,
+            "useSQLCipher": false
+          },
+          "ios": {
+            "customBuildFlags": [
+              "-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1"
             ]
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2dbe92c4-6878-4956-a96c-b98a6b12b223"
+      }
     }
   }
 }

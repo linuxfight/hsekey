@@ -5,13 +5,13 @@
 
 ## Скриншоты
 <p float="left">
-    <img src="1.png"/>
-    <img src="2.png"/>
-    <img src="3.png"/>
-    <img src="4.png"/>
-    <img src="5.png"/>
-    <img src="6.png"/>
-    <img src="7.png"/>
+    <img src="media/1.png" width="100"/>
+    <img src="media/2.png" width="100"/>
+    <img src="media/3.png" width="100"/>
+    <img src="media/4.png" width="100"/>
+    <img src="media/5.png" width="100"/>
+    <img src="media/6.png" width="100"/>
+    <img src="media/7.png" width="100"/>
 </p>
 
 ## Скачать
