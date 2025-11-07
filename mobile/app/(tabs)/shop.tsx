@@ -1,5 +1,6 @@
-import { getApiProductsBalance, getApiProductsList } from "@/api";
-import React, { useState, useEffect } from "react";
+import { getApiProductsBalance, getApiProductsList, postApiProductsBuy } from "@/api";
+import React, { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -33,42 +34,64 @@ export const ShopScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [balanceResponse, productsResponse] = await Promise.all([
-          getApiProductsBalance(),
-          getApiProductsList({ query: { page: 1, limit: 10 } }),
-        ]);
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [balanceResponse, productsResponse] = await Promise.all([
+        getApiProductsBalance(),
+        getApiProductsList({ query: { page: 1, limit: 10 } }),
+      ]);
 
-        if (balanceResponse.data) {
-          setBalance(balanceResponse.data.balance);
-        }
-
-        if (productsResponse.data) {
-          setProducts(productsResponse.data.map(p => ({...p, image: p.imageUrl})));
-        }
-      } catch (error) {
-        Alert.alert("Error", "Failed to fetch data");
-        console.error(error);
-      } finally {
-        setLoading(false);
+      if (balanceResponse.data) {
+        setBalance(balanceResponse.data.balance);
       }
-    };
 
-    fetchData();
+      if (productsResponse.data) {
+        setProducts(productsResponse.data.sort((a, b) => a.id - b.id).map(p => ({...p, image: p.imageUrl})));
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to fetch data");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData])
+  );
+
+  useEffect(() => {
+  }, [fetchData]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchData();
+    }, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const handleBuy = (item: Item) => {
     setSelectedItem(item);
     setModalVisible(true);
   };
 
-  const handleConfirmPurchase = () => {
+  const handleConfirmPurchase = async () => {
     if (selectedItem != null && balance >= selectedItem.price) {
+      const code = await postApiProductsBuy({
+        body: {
+          productId: selectedItem.id
+        }
+      });
+
       setBalance(balance - selectedItem.price);
-      Alert.alert("Success", `You have purchased ${selectedItem.name}`);
+      Alert.alert("Success", `You have purchased ${selectedItem.name}, ${code.data.code}`);
+
+
+      await fetchData(); // Refetch data after successful purchase
     } else {
       Alert.alert(
         "Error",
@@ -100,7 +123,6 @@ export const ShopScreen = () => {
           <Button
             mode="contained"
             onPress={() => handleBuy(item)}
-            icon="cart"
           >
             <Text>{item.price}</Text>
           </Button>
