@@ -15,7 +15,7 @@ const Index = () => {
   }
 
   if (isLoggedIn) {
-    return <Redirect href="/(tabs)/shop" />;
+    return <Redirect href="/(tabs)/stats" />;
   } else {
     return <Redirect href="/(auth)/login" />;
   }

@@ -12,6 +12,7 @@ import {
   readRecords,
   RecordResult,
 } from "react-native-health-connect";
+import { Button, Chip } from "react-native-paper";
 
 import { useThemeColor } from "@/hooks/use-theme-color";
 
@@ -142,20 +143,17 @@ export const StatsScreen = () => {
     <ThemedView style={styles.container}>
       <SafeAreaView>
         <View style={styles.header}>
-          <ThemedText style={styles.date}>
-            {week.format("MMMM YYYY")}
-          </ThemedText>
           <View style={styles.weekNavigation}>
-            <TouchableOpacity onPress={handlePrevWeek}>
-              <ThemedText style={styles.navButton}>&lt; Пред.</ThemedText>
-            </TouchableOpacity>
-            <ThemedText>
-              {week.clone().startOf("week").format("MMM D")} -{" "}
-              {week.clone().endOf("week").format("MMM D")}
-            </ThemedText>
-            <TouchableOpacity onPress={handleNextWeek}>
-              <ThemedText style={styles.navButton}>След. &gt;</ThemedText>
-            </TouchableOpacity>
+            <Button onPress={handlePrevWeek}>
+              &lt; Пред.
+            </Button>
+            <Chip>
+              {week.clone().startOf("week").format("YYYY MMM D")} -{" "}
+              {week.clone().endOf("week").format("YYYY MMM D")}
+            </Chip>
+            <Button onPress={handleNextWeek}>
+              След. &gt;
+            </Button>
           </View>
         </View>
         {loading ? (

@@ -1,36 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedView } from '@/components/themed-view';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ThemedText } from "@/components/themed-text";
-
-const mockTransactions = [
-    {
-        id: '1',
-        price: 100,
-        amount: 1,
-        itemTitle: 'Батончик',
-        imageUrl: 'https://sportivnoepitanie.ru/img/item/500/bombbar-protein-bar-60g.jpg',
-        promocode: 'PROMO123',
-        cancelled: false,
-    },
-  {
-    id: '2',
-    price: 300,
-    amount: 2,
-    itemTitle: 'Протеин 100%',
-    imageUrl: 'https://sportivnoepitanie.ru/img/item/500/optimum-nutrition-100-whey-gold-standard-2270g-1.jpg',
-    isPromocode: false,
-    promocode: 'PROMO789',
-    cancelled: true,
-  },
-];
+import { getTransactions, initDatabase } from "@/utils/database";
 
 export const TransactionsScreen = () => {
     const colorScheme = useColorScheme();
     const styles = getStyles(colorScheme);
+    const [transactions, setTransactions] = useState<any[]>([]);
+
+    const fetchTransactions = useCallback(async () => {
+      try {
+        const fetchedTransactions = await getTransactions();
+        setTransactions(fetchedTransactions);
+      } catch (error) {
+        console.error("Failed to fetch transactions:", error);
+      }
+    }, []);
+
+    useFocusEffect(
+      useCallback(() => {
+        fetchTransactions();
+      }, [fetchTransactions])
+    );
+
+    useEffect(() => {
+      initDatabase().then(() => {
+        fetchTransactions();
+      }).catch(err => console.error("Failed to init database:", err));
+    }, [fetchTransactions]);
 
     const renderItem = ({ item }) => (
     <ThemedView style={styles.itemContainer}>
@@ -48,7 +50,7 @@ export const TransactionsScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={mockTransactions}
+        data={transactions}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
       />

@@ -8,7 +8,7 @@ import {
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   configureFonts,
   MD3DarkTheme,
@@ -18,6 +18,7 @@ import {
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { initDatabase } from "@/utils/database";
 
 const RootLayoutNav = () => {
   return (
@@ -69,6 +70,12 @@ const fontConfig = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    initDatabase()
+      .then(() => console.log("Database initialized"))
+      .catch((err) => console.error("Database init failed", err));
+  }, []);
 
   const theme =
     colorScheme === "dark"

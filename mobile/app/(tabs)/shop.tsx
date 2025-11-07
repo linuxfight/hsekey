@@ -1,6 +1,7 @@
 import { getApiProductsBalance, getApiProductsList, postApiProductsBuy } from "@/api";
 import React, { useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from '@react-navigation/native';
+import { addTransaction } from "@/utils/database";
 import {
   View,
   Text,
@@ -12,7 +13,6 @@ import {
 } from "react-native";
 import { Button, Chip } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
-
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemedView } from "@/components/themed-view";
@@ -90,6 +90,15 @@ export const ShopScreen = () => {
       setBalance(balance - selectedItem.price);
       Alert.alert("Success", `You have purchased ${selectedItem.name}, ${code.data.code}`);
 
+      await addTransaction({
+        id: code.data.code, // Assuming code.data.code is unique and can serve as transaction ID
+        price: selectedItem.price,
+        amount: 1, // Assuming one item per purchase for now
+        itemTitle: selectedItem.name,
+        imageUrl: selectedItem.image,
+        promocode: code.data.code, // Assuming the returned code is the promocode
+        cancelled: false,
+      });
 
       await fetchData(); // Refetch data after successful purchase
     } else {
@@ -124,7 +133,7 @@ export const ShopScreen = () => {
             mode="contained"
             onPress={() => handleBuy(item)}
           >
-            <Text>{item.price}</Text>
+            <Text>{item.price} б.</Text>
           </Button>
         </View>
       </ImageBackground>
@@ -144,7 +153,7 @@ export const ShopScreen = () => {
       <SafeAreaView>
         <View style={styles.header}>
           <Chip>
-            Баланс: {balance}
+            Баллы: {balance}
           </Chip>
         </View>
         <FlatList

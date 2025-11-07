@@ -12,6 +12,15 @@ export default function TabLayout() {
             tabBar={(props) => <CustomTabBar {...props} />}
         >
             <Tabs.Screen
+                name="stats"
+                options={{
+                    title: 'Моя статистика',
+                    tabBarIcon: ({ color, size }) => (
+                        <MaterialCommunityIcons name="chart-bar" color={color} size={size} />
+                    ),
+                }}
+            />
+            <Tabs.Screen
                 name="shop"
                 options={{
                     title: 'Магазин',
@@ -21,18 +30,9 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="stats"
-                options={{
-                    title: 'Статистика',
-                    tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="chart-bar" color={color} size={size} />
-                    ),
-                }}
-            />
-            <Tabs.Screen
                 name="transactions"
                 options={{
-                    title: 'Покупки',
+                    title: 'Мои промокоды',
                     tabBarIcon: ({ color, size }) => (
                         <MaterialCommunityIcons name="format-list-bulleted" color={color} size={size} />
                     ),
