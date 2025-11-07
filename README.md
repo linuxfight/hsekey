@@ -17,7 +17,7 @@
 ## Скачать
 Пока что можно только на Android
 
-Вот тут - https://github.com/linuxfight/hsekey/releases
+Вот тут - https://github.com/linuxfight/hsekey/releases/download/v1.0/fitboost.apk
 
 ## Что есть?
 - Авторизация
