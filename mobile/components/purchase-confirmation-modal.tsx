@@ -1,5 +1,6 @@
 import React from 'react';
-import { Modal, View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { Modal, View, Text, StyleSheet, Image } from 'react-native';
+import { Button } from 'react-native-paper';
 import { ThemedView } from './themed-view';
 import { ThemedText } from './themed-text';
 
@@ -19,19 +20,26 @@ const PurchaseConfirmationModal = ({ visible, item, onConfirm, onCancel }) => {
           <Image source={{ uri: item.image }} style={styles.itemImage} />
           <ThemedText style={styles.itemName}>{item.name}</ThemedText>
           <ThemedText style={styles.itemPrice}>Цена: {item.price}</ThemedText>
+          import { Button } from "react-native-paper";
+
+// ... (rest of the imports)
+
+// ... (inside the component)
           <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[styles.button, styles.buttonConfirm]}
+            <Button
+              mode="contained"
               onPress={onConfirm}
+              style={styles.button}
             >
-              <Text style={styles.textStyle}>Да</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button, styles.buttonCancel]}
+              Да
+            </Button>
+            <Button
+              mode="outlined"
               onPress={onCancel}
+              style={styles.button}
             >
-              <Text style={styles.textStyle}>Нет</Text>
-            </TouchableOpacity>
+              Нет
+            </Button>
           </View>
         </ThemedView>
       </View>
@@ -86,22 +94,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
     flex: 1,
     marginHorizontal: 5,
-  },
-  buttonConfirm: {
-    backgroundColor: '#2196F3',
-  },
-  buttonCancel: {
-    backgroundColor: '#f44336',
-  },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
   },
 });
 

@@ -4,12 +4,14 @@
  */
 
 import { Platform } from 'react-native';
+import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+const tintColorLight = MD3LightTheme.colors.tertiary;
+const tintColorDark = MD3DarkTheme.colors.tertiary;
 
 export const Colors = {
   'light': {
+    ...MD3LightTheme.colors,
     text: '#11181C',
     background: '#fff',
     tint: tintColorLight,
@@ -18,6 +20,7 @@ export const Colors = {
     tabIconSelected: tintColorLight,
   },
   'dark': {
+    ...MD3DarkTheme.colors,
     text: '#ECEDEE',
     background: '#151718',
     tint: tintColorDark,

@@ -18,16 +18,6 @@ import { useThemeColor } from "@/hooks/use-theme-color";
 moment.locale("ru");
 const screenWidth = Dimensions.get("window").width;
 
-const chartConfig = {
-  backgroundGradientFrom: "#fff",
-  backgroundGradientTo: "#fff",
-  strokeWidth: 2, // optional, default 3
-
-  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-  barPercentage: 0.5,
-  useShadowColorFromDataset: false, // optional
-};
-
 const readSampleData = async (date: moment.Moment) => {
   const isInitialized = await initialize();
   console.log("Initialized:", isInitialized);

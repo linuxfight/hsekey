@@ -6,10 +6,10 @@ import {
   StyleSheet,
   FlatList,
   ImageBackground,
-  TouchableOpacity,
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { Button } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -39,7 +39,7 @@ export const ShopScreen = () => {
         setLoading(true);
         const [balanceResponse, productsResponse] = await Promise.all([
           getApiProductsBalance(),
-          getApiProductsList({ query: { page: 0, limit: 10 } }),
+          getApiProductsList({ query: { page: 1, limit: 10 } }),
         ]);
 
         if (balanceResponse.data) {
@@ -97,13 +97,13 @@ export const ShopScreen = () => {
       >
         <View style={styles.overlayView}>
           <Text style={styles.itemName}>{item.name}</Text>
-          <TouchableOpacity
-            style={styles.buyButton}
+          <Button
+            mode="contained"
             onPress={() => handleBuy(item)}
+            icon="cart"
           >
-            <Ionicons name="cart" size={20} color="#fff" />
-            <Text style={styles.buyButtonText}>{item.price}</Text>
-          </TouchableOpacity>
+            <Text>{item.price}</Text>
+          </Button>
         </View>
       </ImageBackground>
     </View>
@@ -196,21 +196,6 @@ const getStyles = (colorScheme) =>
       fontWeight: "bold",
       marginBottom: 10,
       color: "#fff",
-    },
-    buyButton: {
-      backgroundColor: "rgba(255, 193, 7)",
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderRadius: 25,
-    },
-    buyButtonText: {
-      color: "#fff",
-      fontWeight: "bold",
-      fontSize: 16,
-      marginLeft: 5,
     },
   });
 
