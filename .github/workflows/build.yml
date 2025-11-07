@@ -5,14 +5,12 @@ on:
     paths-ignore:
       - .gitignore
       - README.md
-      - compose.yml
-      - .npmrc
+      - media
   pull_request:
     paths-ignore:
       - .gitignore
       - README.md
-      - compose.yml
-      - .npmrc
+      - media
 
 permissions:
   contents: write
