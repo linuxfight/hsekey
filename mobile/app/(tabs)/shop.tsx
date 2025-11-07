@@ -1,22 +1,15 @@
-import { getApiProductsBalance, getApiProductsList, postApiProductsBuy } from "@/api";
-import React, { useState, useEffect, useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
-import { addTransaction } from "@/utils/database";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  ImageBackground,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
-import { Button, Chip } from "react-native-paper";
+import { Button, Chip, Dialog, Portal, Paragraph, ActivityIndicator } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemedView } from "@/components/themed-view";
 import PurchaseConfirmationModal from "@/components/purchase-confirmation-modal";
+import { StyleSheet, View, FlatList, ImageBackground, Text } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from '@react-navigation/native';
+import { addTransaction } from "@/utils/database";
+import { getApiProductsBalance, getApiProductsList, postApiProductsBuy } from "@/api";
+
 
 type Item = {
   id: string;
@@ -33,6 +26,14 @@ export const ShopScreen = () => {
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showPromoDialog, setShowPromoDialog] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoItemName, setPromoItemName] = useState("");
+
+  const hideErrorDialog = () => setShowErrorDialog(false);
+  const hidePromoDialog = () => setShowPromoDialog(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -50,8 +51,9 @@ export const ShopScreen = () => {
         setProducts(productsResponse.data.sort((a, b) => a.id - b.id).map(p => ({...p, image: p.imageUrl})));
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to fetch data");
       console.error(error);
+      setErrorMessage("Ошибка сервера, попробуйте позже");
+      setShowErrorDialog(true);
     } finally {
       setLoading(false);
     }
@@ -81,31 +83,37 @@ export const ShopScreen = () => {
 
   const handleConfirmPurchase = async () => {
     if (selectedItem != null && balance >= selectedItem.price) {
-      const code = await postApiProductsBuy({
-        body: {
-          productId: selectedItem.id
-        }
-      });
+      try {
+        const code = await postApiProductsBuy({
+          body: {
+            productId: selectedItem.id
+          }
+        });
 
-      setBalance(balance - selectedItem.price);
-      Alert.alert("Success", `You have purchased ${selectedItem.name}, ${code.data.code}`);
+        setBalance(balance - selectedItem.price);
+        setPromoCode(code.data.code);
+        setPromoItemName(selectedItem.name);
+        setShowPromoDialog(true);
 
-      await addTransaction({
-        id: code.data.code, // Assuming code.data.code is unique and can serve as transaction ID
-        price: selectedItem.price,
-        amount: 1, // Assuming one item per purchase for now
-        itemTitle: selectedItem.name,
-        imageUrl: selectedItem.image,
-        promocode: code.data.code, // Assuming the returned code is the promocode
-        cancelled: false,
-      });
+        await addTransaction({
+          id: code.data.code, // Assuming code.data.code is unique and can serve as transaction ID
+          price: selectedItem.price,
+          amount: 1, // Assuming o ne item per purchase for now
+          itemTitle: selectedItem.name,
+          imageUrl: selectedItem.image,
+          promocode: code.data.code, // Assuming the returned code is the promocode
+          cancelled: false,
+        });
 
-      await fetchData(); // Refetch data after successful purchase
+        await fetchData(); // Refetch data after successful purchase
+      } catch (apiError) {
+        console.error("Error during purchase:", apiError);
+        setErrorMessage("Ошибка сервера, попробуйте позже");
+        setShowErrorDialog(true);
+      }
     } else {
-      Alert.alert(
-        "Error",
-        "You do not have enough funds to purchase this item",
-      );
+      setErrorMessage("У вас недостаточно баллов для покупки");
+      setShowErrorDialog(true);
     }
     setModalVisible(false);
   };
@@ -170,6 +178,31 @@ export const ShopScreen = () => {
           onCancel={handleCancelPurchase}
         />
       </SafeAreaView>
+
+      <Portal>
+        <Dialog visible={showErrorDialog} onDismiss={hideErrorDialog}>
+          <Dialog.Title>Ошибка</Dialog.Title>
+          <Dialog.Content>
+            <Paragraph>{errorMessage}</Paragraph>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={hideErrorDialog}>Хорошо</Button>
+          </Dialog.Actions>
+        </Dialog>
+
+        <Dialog visible={showPromoDialog} onDismiss={hidePromoDialog}>
+          <Dialog.Title>Вы получили {promoItemName}!</Dialog.Title>
+          <Dialog.Content>
+            <Paragraph></Paragraph>
+            <Paragraph>Ваш промокод на товар: {promoCode}.</Paragraph>
+            <Paragraph></Paragraph>
+            <Paragraph>Если промокод понадобится позже, то вы можете найти его во вкладке "Мои промокоды".</Paragraph>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={hidePromoDialog}>Отлично!</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </ThemedView>
   );
 };

@@ -12,9 +12,10 @@ import {
   readRecords,
   RecordResult,
 } from "react-native-health-connect";
-import { Button, Chip } from "react-native-paper";
+import { Button, Chip, Dialog, Portal, Paragraph } from "react-native-paper";
 
 import { useThemeColor } from "@/hooks/use-theme-color";
+import { postApiStatsReport } from "@/api/sdk.gen"; // Import postApiStatsReport
 
 moment.locale("ru");
 const screenWidth = Dimensions.get("window").width;
@@ -77,6 +78,9 @@ export const StatsScreen = () => {
   const [records, setRecords] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]); // Initialize with zeros
   const [week, setWeek] = useState(moment());
   const [loading, setLoading] = useState(true);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const themed = {
     background: useThemeColor({}, "background"),
     text: useThemeColor({}, "text"),
@@ -93,17 +97,39 @@ export const StatsScreen = () => {
     useShadowColorFromDataset: false, // optional
   };
 
+  const hideErrorDialog = () => setShowErrorDialog(false);
+
   useEffect(() => {
     setLoading(true);
     readSampleData(week)
-      .then((fetchedRecords) => {
+      .then(async (fetchedRecords) => { // Mark as async to use await
         const processed = processRecords(fetchedRecords);
         console.log("Processed records:", processed); // Debug log
         setRecords(processed);
+
+        // Report stats for the latest day
+        const today = moment().isoWeekday(); // 1=Monday, 7=Sunday
+        const latestDaySteps = processed[today - 1]; // Get steps for today
+
+        try {
+          await postApiStatsReport({
+            requestBody: {
+              stepsAmount: latestDaySteps,
+              reportRunning: true,
+            },
+          });
+          console.log("Stats reported successfully for today:", latestDaySteps);
+        } catch (apiError) {
+          console.error("Error reporting stats to API:", apiError);
+          setErrorMessage("Failed to report stats. Please try again later.");
+          setShowErrorDialog(true);
+        }
       })
       .catch((error) => {
         console.error(error);
         setRecords([0, 0, 0, 0, 0, 0, 0]); // Set zeros on error
+        setErrorMessage("Failed to fetch health data. Please check permissions.");
+        setShowErrorDialog(true);
       })
       .finally(() => {
         setLoading(false);
@@ -167,6 +193,18 @@ export const StatsScreen = () => {
           />
         )}
       </SafeAreaView>
+
+      <Portal>
+        <Dialog visible={showErrorDialog} onDismiss={hideErrorDialog}>
+          <Dialog.Title>Error</Dialog.Title>
+          <Dialog.Content>
+            <Paragraph>{errorMessage}</Paragraph>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={hideErrorDialog}>Okay</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </ThemedView>
   );
 };
